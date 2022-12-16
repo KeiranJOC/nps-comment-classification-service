@@ -105,7 +105,16 @@ def predict(device, model, test_dataloader):
 
 def save_model(tokenizer, model):
     review_classifier = pipeline('text-classification', model=model, tokenizer=tokenizer)
-    bentoml.transformers.save_model(name='review-classifier', pipeline=review_classifier)
+    bentoml.transformers.save_model(
+        name='review-classifier', 
+        pipeline=review_classifier,
+        signatures={ # enable Transformer to use adaptive batching at inference
+            "__call__": {
+                "batchable": True,
+                "batch_dim": 0,
+            },
+        },
+    )
 
 
 if __name__=='__main__':
